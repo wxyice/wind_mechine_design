@@ -57,6 +57,7 @@ def cal_Cp2max(a,r,R,n,r_hub,v1):
     while err>0.00001:
         
         df=cal_Cp(a_new,r,R,n,r_hub,v1)-cal_Cp(a,r,R,n,r_hub,v1)
+
         if df<0:
             deltaA = -deltaA
         a=a_new
@@ -72,40 +73,44 @@ def cal_Cp2max(a,r,R,n,r_hub,v1):
     return a_new,cal_Cp(a_new,r,R,n,r_hub,v1)
 
 def cal_a1(a,r,R,n,r_hub,v1):
-    
+    dx=1e-6
+    err=1000
+    a1=0
+    while err>1e-6:
+        dy=(cal_f(n,r,v1,R,r_hub,a, a1+dx)-cal_f(n,r,v1,R,r_hub,a, a1))/dx
+        a1=a1-cal_f(n,r,v1,R,r_hub,a, a1)/(dy+1e-8)
+        err=abs(cal_f(n,r,v1,R,r_hub,a, a1))
+    #print("a1={0:8.4f}".format(a1))
+    return a1
+
+def cal_CPmax(r,R,n,r_hub,v1):
     err=100
-    deltaA=0.00001
-    a1=random.random()
-    a1_new=a1+deltaA
-    count=0
-    while err>0.001:
-        
-        df=(abs(cal_f(n,r,v1,R,r_hub,a,a1_new))-abs(cal_f(n,r,v1,R,r_hub,a,a1)))
-        if df>0:
-            deltaA = -deltaA
+    da=0.0001
+    a=random.random()
+    #count=0
+    learning_rate=0.001
 
-        a1=a1_new
-        a1_new=a1+deltaA
+    while True:
+        dCp=(cal_Cp(a+da,r,R,n,r_hub,v1)-cal_Cp(a,r,R,n,r_hub,v1))/da
 
-        err=abs(cal_f(n, r, v1, R, r_hub, a, a1_new))
-
-        count+=1
-        if count>10e8:
-            #print('break={}'.format(count))
+        a_new = a + dCp * learning_rate
+        err=abs(a_new-a)  
+        print('err={}'.format(err))   
+        if err<1e-4:
             break
-    
-    return a1_new
-
-def Newton():
-    
-
-
-    
+        else:
+            a=a_new
+            print("a={}".format(a_new))
+        # count+=1
+        # if count>300:
+        #     print('break')
+        #     break
+    return a_new,cal_Cp(a_new,r,R,n,r_hub,v1)
 
 if __name__ == '__main__':
 
     # a1=cal_a1(a=0.34,r=20,R=70,n=72,r_hub=2,v1=13)
-    a,cp=cal_Cp2max(a=0.34,r=20,R=70,n=72,r_hub=2,v1=13)
+    a,cp=cal_CPmax(r=20,R=70,n=72,r_hub=2,v1=13)
     print(a,cp)
     #print(a1)
     # a11=[]
