@@ -1,8 +1,8 @@
 import random
-from math import acos, atan, e, pi, sin
+from math import acos, atan, e, pi, sin,cos
 from matplotlib import pyplot as plt
 
-
+import numpy as np
 
 
 def cal_F(r,R,n,r_hub,phi):
@@ -59,7 +59,7 @@ def cal_a1(a,r,R,n,r_hub,v1):
 
 def cal_CPmax(r,R,n,r_hub,v1):
     err=100
-    da=0.0001
+    da=1e-5
     a=random.random()
     learning_rate=0.001
 
@@ -78,83 +78,124 @@ def cal_CPmax(r,R,n,r_hub,v1):
     return a_new,cal_a1(a_new,r,R,n,r_hub,v1),cal_Cp(a_new,r,R,n,r_hub,v1)
 
 
-# def cal_Cp2max(a,r,R,n,r_hub,v1):
-    
-#     err=100
-#     deltaA=0.0001
+def cal_l(a,F,phi,n,r,Cl):
+    k1=8*pi*a*F*(1-a*F)*sin(phi)**2
+    k2=(1-a)**2*cos(phi)
+    k3=r*60/(n*pi*Cl)
+    return k1/k2*k3
 
-#     count=0
-#     a_new=a+deltaA
-#     while err>0.00001:
-        
-#         df=cal_Cp(a_new,r,R,n,r_hub,v1)-cal_Cp(a,r,R,n,r_hub,v1)
+def cal_sigma(n,l,Cl,r):
+    return n*l*Cl/(8*pi*r)
 
-#         if df<0:
-#             deltaA = -deltaA
-#         a=a_new
-#         a_new=a+deltaA
 
-#         err=abs(df)
-#         print('err={}'.format(err))
-#         print(a_new)
-#         count+=1
-#         if count>300:
-#             print('break')
-#             break
-#     return a_new,cal_Cp(a_new,r,R,n,r_hub,v1)
-
-# def cal_a1(a,r,R,n,r_hub,v1):
-#     dx=1e-6
-#     err=1000
-#     a1=0
-#     while err>1e-6:
-#         dy=(cal_f(n,r,v1,R,r_hub,a, a1+dx)-cal_f(n,r,v1,R,r_hub,a, a1))/dx
-#         a1=a1-cal_f(n,r,v1,R,r_hub,a, a1)/(dy+1e-8)
-#         err=abs(cal_f(n,r,v1,R,r_hub,a, a1))
-#     #print("a1={0:8.4f}".format(a1))
-#     return a1
-
-# def cal_CPmax(r,R,n,r_hub,v1):
-#     err=100
-#     da=0.0001
-#     a=random.random()
-#     #count=0
-#     learning_rate=0.001
-
-#     while True:
-#         dCp=(cal_Cp(a+da,r,R,n,r_hub,v1)-cal_Cp(a,r,R,n,r_hub,v1))/da
-
-#         a_new = a + dCp * learning_rate
-#         err=abs(a_new-a)  
-#         print('err={}'.format(err))   
-#         if err<1e-4:
-#             break
-#         else:
-#             a=a_new
-#             print("a={}".format(a_new))
-#         # count+=1
-#         # if count>300:
-#         #     print('break')
-#         #     break
-#     return a_new,cal_Cp(a_new,r,R,n,r_hub,v1)
 if __name__ == '__main__':
+    R=12.7
+    r_hub=0.3
+    v1=13
+    n=72
+    Cl=1.0423
+    omega=3.77
 
-    rlist=[]
+    skip=100
+    delta=0.0001
+
+
+    # a a1 cp 
+    rlist=iter(np.linspace(r_hub+delta,R-delta,skip))
     alist=[]
     Cplist=[]
     a1list=[]
 
-    for i in range(4,72,4):
-        a,a1,cp=cal_CPmax(r=i,R=70,n=72,r_hub=2,v1=13)
-        rlist.append(i)
+    while True:
+        try:
+            r=next(rlist)
+        except :
+            break
+        a,a1,cp=cal_CPmax(r=r,R=R,n=n,r_hub=r_hub,v1=v1)
+        #rlist.append(i)
         alist.append(a)
         a1list.append(a1)
-        
-        print("r={3},a={0},a1={1},cp={2}".format(a,a1,cp,i))
+        Cplist.append(cp)
 
-    plt.plot(rlist,a1list)
-    plt.show()
+        print("r={3},a={0},a1={1},cp={2}".format(a,a1,cp,r))
+
+
+    # F phi l 
+    rlist=np.linspace(r_hub+delta,R-delta,skip)
+    rlist=rlist.tolist()
+    aa1iter=iter(zip(rlist,alist,a1list))
+
+    philist=[]
+    Flist=[]
+    llist=[]
+    sigmalist=[]
+
+    while True:
+        try:
+            r,a,a1=next(aa1iter)
+        except :
+            break
+        lamda=(n*pi/60)*r/v1
+        phi=cal_phi(a,a1,lamda)
+        F=cal_F(r,R,n,r_hub,phi)
+        l=cal_l(a,F,phi,n,r,Cl)
+        sigma=cal_sigma(n,l,Cl,r)
+
+
+        philist.append(phi)
+        Flist.append(F)
+        llist.append(l)
+        sigmalist.append(sigma)
     
+
+    av1list=np.array(alist)*v1
+    omegarlist=np.linspace(r_hub+delta,R-delta,skip)*omega*np.array(a1list)
+    W=np.sqrt(av1list**2+omegarlist**2).tolist()
+    av1list=av1list.tolist()
+    omegarlist=omegarlist.tolist()
+
+
+
+
+    #--------------------draw--------------------------------
+
+    rlist=np.linspace(r_hub+delta,R-delta,skip)
+
+    value=[alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W]
+    with open('result.txt','w') as f:
+        for i in range(len(rlist)):
+            f.write("{0} ".format(rlist[i]))
+            for j in value:
+                f.write("{0} ".format(j[i]))
+            f.write('\n')
+
+    list1=[rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W]
+    
+    
+    with open('data.xls','w',encoding='gbk') as output:
+
+        for i in range(len(list1)):
+            for j in range(len(list1[i])):
+                output.write(str(list1[i][j]))    
+                output.write('\t')   
+            output.write('\n')       
+    output.close()
+
+    
+
+    for i in range(len(value)):
+        plt.subplot(5,2,i+1)
+        plt.plot(rlist,value[i])
+
+    plt.show()
+
+
+
+
+
+    
+    
+
 
     
 
