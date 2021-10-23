@@ -9,7 +9,7 @@ def cal_F(r,R,n,r_hub,phi):
     """
     :param: r 半径位置 m
     :param: R 风轮半径 m
-    :param: n 转速     rpm
+    :param: n 转速     rps
     :param: r_hub 轮毂半径 m
     :param: phi 入流角 rad
     """
@@ -28,7 +28,7 @@ def cal_Cp(a,r,R,n,r_hub,v1):
     lamda 当地叶尖速比
     """
     a1=cal_a1(a,r,R,n,r_hub,v1)
-    lamda=(n*pi/60)*r/v1
+    lamda=(n*2*pi)*r/v1
     phi=cal_phi(a,a1,lamda)
     F=cal_F(r,R,n,r_hub,phi)
 
@@ -40,10 +40,10 @@ def cal_phi(a,a1,lamda):
     return phi
 
 def cal_f(n,r,v1,R,r_hub,a,a1):
-    lamda=(n*pi/60)*r/v1
+    lamda=(n*2*pi)*r/v1
     phi=cal_phi(a,a1,lamda)
     F=cal_F(r,R,n,r_hub,phi)
-    f=a1*(1+a1)*lamda**2-(a*(1-a*F))
+    f=a1*(1+a1)*(lamda**2)-(a*(1-a*F))
     #print('f={}'.format(f))
     return f
 
@@ -61,43 +61,52 @@ def cal_CPmax(r,R,n,r_hub,v1):
     err=100
     da=1e-5
     a=random.random()
-    learning_rate=0.001
-
+    learning_rate=0.01
+    iternum=0
     while True:
         dCp=(cal_Cp(a+da,r,R,n,r_hub,v1)-cal_Cp(a,r,R,n,r_hub,v1))/da
 
         a_new = a + dCp * learning_rate
         err=abs(a_new-a)  
+        iternum+=1
         #print('err={}'.format(err))   
         if err<1e-6:
             break
         else:
             a=a_new
-            #print("a={}".format(a_new))
-
+            #print("a={},iter={}".format(a_new,iternum))
+        # if iternum>10000:
+        #     a=random.random()
+        #     iternum=0
     return a_new,cal_a1(a_new,r,R,n,r_hub,v1),cal_Cp(a_new,r,R,n,r_hub,v1)
-
+# l=2
+# sigma=0.05
+# 4/5 pi
 
 def cal_l(a,F,phi,n,r,Cl):
     k1=8*pi*a*F*(1-a*F)*sin(phi)**2
     k2=(1-a)**2*cos(phi)
-    k3=r*60/(n*pi*Cl)
+    
+    k3=r/(n*Cl)
+
     return k1/k2*k3
 
-def cal_sigma(n,l,Cl,r):
-    return n*l*Cl/(8*pi*r)
+def cal_sigma(a,F,phi):
+    k1=a*F*(1-a*F)*sin(phi)**2
+    k2=(1-a)**2*cos(phi)
+    return k1/k2
 
 
 if __name__ == '__main__':
     R=12.7
     r_hub=0.3
     v1=13
-    n=72
+    n=72/60
     Cl=1.0423
-    omega=3.77
+    omega=n*2*pi
 
     skip=100
-    delta=0.0001
+    delta=0.01
 
 
     # a a1 cp 
@@ -129,33 +138,31 @@ if __name__ == '__main__':
     Flist=[]
     llist=[]
     sigmalist=[]
+    lamdalist=[]
 
     while True:
         try:
             r,a,a1=next(aa1iter)
         except :
             break
-        lamda=(n*pi/60)*r/v1
+        lamda=(n*2*pi)*r/v1
         phi=cal_phi(a,a1,lamda)
         F=cal_F(r,R,n,r_hub,phi)
         l=cal_l(a,F,phi,n,r,Cl)
-        sigma=cal_sigma(n,l,Cl,r)
+        sigma=cal_sigma(a,F,phi)
 
-
+        lamdalist.append(lamda)
         philist.append(phi)
         Flist.append(F)
         llist.append(l)
         sigmalist.append(sigma)
     
-
+    
     av1list=np.array(alist)*v1
     omegarlist=np.linspace(r_hub+delta,R-delta,skip)*omega*np.array(a1list)
-    W=np.sqrt(av1list**2+omegarlist**2).tolist()
+    W=(v1*np.sqrt((1-np.array(alist))**2+(1+np.array(a1list))**2*np.array(lamdalist)**2)).tolist()
     av1list=av1list.tolist()
     omegarlist=omegarlist.tolist()
-
-
-
 
     #--------------------draw--------------------------------
 
@@ -181,7 +188,6 @@ if __name__ == '__main__':
             output.write('\n')       
     output.close()
 
-    
 
     for i in range(len(value)):
         plt.subplot(5,2,i+1)
