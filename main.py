@@ -1,5 +1,5 @@
 import random
-from math import acos, atan, e, pi, sin,cos
+from math import acos, atan, e, pi, sin,cos, sqrt
 from matplotlib import pyplot as plt
 
 import numpy as np
@@ -101,6 +101,52 @@ def cal_CPmax(r,R,n,r_hub,v1):
     return a_new,cal_a1(a_new,r,R,n,r_hub,v1),cal_Cp(a_new,r,R,n,r_hub,v1)
 
 
+def Re2Cl(Re):
+    '''
+    R² = 0.9996
+    '''
+    if Re>10e5:
+       Cl=1.0423
+    if 2e5<Re<10e5:
+        Cl=-(1e-7)*Re + 1.175
+    elif 1e5<Re<2e5:
+        print(Re)
+        Cl=-(4e-7)*Re + 1.236
+    elif Re<1e5:
+        print(Re)
+        Cl=(1e-5)*Re + 0.0231
+    return Cl
+
+
+
+def cal_l_Re(a,a1,r,R,n,r_hub,v1):
+
+    def cal_W(a,a1,lamda,v1):
+        return v1*sqrt((1-a)**2+(1-a1)**2*lamda**2)
+    def cal_Re(W,l,v=1.511e-5):
+        return W*l/v
+    
+    def cal_f(l,W,F,phi,n,r):
+        Re=cal_Re(W,l,v=1.511e-5)
+        Cl=Re2Cl(Re)   
+        return cal_l(a,F,phi,n,r,Cl)-l
+
+
+    lamda=(n*2*pi)*r/v1
+    phi=cal_phi(a, a1, lamda)
+    F=cal_F(r, R, n, r_hub, phi)
+    W=cal_W(a,a1,lamda,v1)
+
+    err=10000
+    l=1.5
+    dx=1e-6
+    
+    while err>1e-6:
+        dy=(cal_f(l+dx,W,F,phi,n,r)-cal_f(l,W,F,phi,n,r))/dx
+        l=l-cal_f(l,W,F,phi,n,r)/(dy+1e-8)
+        err=abs(cal_f(l,W,F,phi,n,r))
+    return l
+    
 
 
 
@@ -147,7 +193,7 @@ if __name__ == '__main__':
         lamda=(n*2*pi)*r/v1
         phi=cal_phi(a,a1,lamda)
         F=cal_F(r,R,n,r_hub,phi)
-        l=cal_l(a,F,phi,n,r,Cl)
+        l=cal_l_Re(a,a1,r,R,n,r_hub,v1)
         sigma=cal_sigma(a,F,phi)
 
         lamdalist.append(lamda)
@@ -165,41 +211,44 @@ if __name__ == '__main__':
     av1list=av1list.tolist()
     omegarlist=omegarlist.tolist()
 
-    #--------------------------save data as txt-------------------------
     rlist=np.linspace(r_hub+delta,R-delta,step)
 
     value=[alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W]
-    with open('result.txt','w') as f:
-        for i in range(len(rlist)):
-            f.write("{0} ".format(rlist[i]))
-            for j in value:
-                f.write("{0} ".format(j[i]))
-            f.write('\n')
-
-    list1=[rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W]
     
-    #--------------------------save data as xls-------------------------------
-    with open('data.xls','w',encoding='gbk') as output:
+    save=True
+    if save:
+        #--------------------------save data as txt-------------------------
 
-        for i in range(len(list1)):
-            for j in range(len(list1[i])):
-                output.write(str(list1[i][j]))    
-                output.write('\t')   
-            output.write('\n')       
-    output.close()
+        with open('result_Re_liner_cut.txt','w') as f:
+            for i in range(len(rlist)):
+                f.write("{0} ".format(rlist[i]))
+                for j in value:
+                    f.write("{0} ".format(j[i]))
+                f.write('\n')
+
+        list1=[rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W]
+        
+        #--------------------------save data as xls-------------------------------
+        with open('data_Re_liner_cut.xls','w',encoding='gbk') as output:
+
+            for i in range(len(list1)):
+                for j in range(len(list1[i])):
+                    output.write(str(list1[i][j]))    
+                    output.write('\t')   
+                output.write('\n')       
+        output.close()
 
     #-----------------------------draw---------------------------------------
-    for i in range(len(value)):
-        plt.subplot(5,2,i+1)
-        plt.plot(rlist,value[i])
 
-    plt.show()
+    draw=True
+    if draw:
+        for i in range(len(value)):
+            plt.subplot(5,2,i+1)
+            plt.plot(rlist,value[i])
+        plt.show()
 
 
 
-
-
-    
     
 
 
