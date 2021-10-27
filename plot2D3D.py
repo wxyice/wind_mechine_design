@@ -26,7 +26,7 @@ def draw3D(X=[], Y=[], Z=[], x=[], y=[], z=[]):
     fig = plt.figure()
     ax = p3.Axes3D(fig)
 
-
+    
     # Setting Cp
     # ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap='viridis', edgecolor='none')  # 绘制3d面
     ax.plot_wireframe(X, Y, Z, color='c', linewidth=0.3)  # 绘制3d网格
@@ -68,7 +68,7 @@ def draw2D(X=[], Y=[], x=[], y=[]):
     point = ax.plot([], [], 'r-', animated=False, linewidth=3.0)[0]
 
     # Creating the Animation object
-    point_ani = animation.FuncAnimation(fig, update_point2D, frames=len(y), fargs=(point, x, y), interval=200, blit=False, repeat=False)
+    point_ani = animation.FuncAnimation(fig, update_point2D, frames=len(y), fargs=(point, x, y), interval=600, blit=False, repeat=False)
     point_ani.save('2D.gif', writer='pillow')
 
     plt.show()
@@ -77,13 +77,13 @@ def draw2D(X=[], Y=[], x=[], y=[]):
 
 
 
-def f(x, y):
-        return np.sin(np.sqrt(x ** 2 + y ** 2))
 
 if __name__ == '__main__':
+    def f(x, y):
+            return np.sin(np.sqrt(x ** 2 + y ** 2))
     # Code testing
     x = np.linspace(-6,6,30)
-    y = np.linspace(-6,6,30)
+    y = np.linspace(-3,9,30)
     X, Y = np.meshgrid(x, y)
     Z = f(X, Y)
     z = f(x, y)
