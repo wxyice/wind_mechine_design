@@ -3,6 +3,7 @@ from math import acos, atan, e, pi, sin,cos, sqrt
 from matplotlib import pyplot as plt
 
 import numpy as np
+import os
 
 
 def cal_F(r,R,n,r_hub,phi):
@@ -148,25 +149,17 @@ def cal_l_Re(a,a1,r,R,n,r_hub,v1):
     return l
     
 
-
-
-if __name__ == '__main__':
-    R=12.7
-    r_hub=0.3
-    v1=13
-    n=72/60
-    Cl=1.0423
+def main_cal(R,r_hub,v1,n):
+    #Cl=1.0423
     omega=n*2*pi
-
-    step=30
-    delta=0.01
+    step=100
+    delta=0.1
 
 
     #------------------------calculate---------------------------
     rlist=iter(np.linspace(r_hub+delta,R-delta,step))
-    alist=[]
-    Cplist=[]
-    a1list=[]
+    alist,a1list,Cplist=[],[],[]
+    philist,Flist,llist,sigmalist,lamdalist=[],[],[],[],[]
 
     while True:
         try:
@@ -174,52 +167,63 @@ if __name__ == '__main__':
         except :
             break
         a,a1,cp=cal_CPmax(r=r,R=R,n=n,r_hub=r_hub,v1=v1)
-        alist.append(a)
-        a1list.append(a1)
-        Cplist.append(cp)
-
-        print("r={3:6.4f} a={0:6.4f} a1={1:6.4f} cp={2:6.4f}".format(a,a1,cp,r))
-
-    rlist=np.linspace(r_hub+delta,R-delta,step).tolist()
-    aa1iter=iter(zip(rlist,alist,a1list))
-
-    philist,Flist,llist,sigmalist,lamdalist=[],[],[],[],[]
-
-    while True:
-        try:
-            r,a,a1=next(aa1iter)
-        except :
-            break
         lamda=(n*2*pi)*r/v1
         phi=cal_phi(a,a1,lamda)
         F=cal_F(r,R,n,r_hub,phi)
         l=cal_l_Re(a,a1,r,R,n,r_hub,v1)
         sigma=cal_sigma(a,F,phi)
-
+        
+        alist.append(a)
+        a1list.append(a1)
+        Cplist.append(cp)
         lamdalist.append(lamda)
         philist.append(phi)
         Flist.append(F)
         llist.append(l)
         sigmalist.append(sigma)
 
-        print("r={3:6.4f} lamda={0:6.4f} phi={1:6.4f} F={2:6.4f} l={4:6.4f} sigma={5:6.4f}".format(lamda,phi,F,r,l,sigma))
-    
-    
+        print("r={0:6.2f} a={1:6.4f} a1={2:6.4f} cp={3:6.4f} lamda={4:6.4f} phi={5:6.4f} F={6:6.4f} l={7:6.4f} sigma={8:6.4f}".format(r,a,a1,cp,lamda,phi,F,l,sigma))
+
+    rlist=np.linspace(r_hub+delta,R-delta,step).tolist()
     av1list=np.array(alist)*v1
     omegarlist=np.linspace(r_hub+delta,R-delta,step)*omega*np.array(a1list)
     W=(v1*np.sqrt((1-np.array(alist))**2+(1+np.array(a1list))**2*np.array(lamdalist)**2)).tolist()
+
     av1list=av1list.tolist()
     omegarlist=omegarlist.tolist()
 
-    rlist=np.linspace(r_hub+delta,R-delta,step)
+    #rlist=np.linspace(r_hub+delta,R-delta,step)
+    value=[rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W]
 
+    return value
+
+
+if __name__ == '__main__':
+    # 基本参数数据
+    R=12.7      # m
+    r_hub=0.3   # m
+    v1=13       # m/s
+    n=72/60     # 圈/s
+
+    # case名称,保存路径
+    name='test1'
+    path='result'
+
+    if os.path.exists(path)==False:
+        os.mkdir(path)
+
+    value=main_cal(R,r_hub,v1,n)
+
+    rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W=value
     value=[alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W]
-    
-    save=True
+
+
+
+    save=False
     if save:
         #--------------------------save data as txt-------------------------
 
-        with open('result_Re_liner_cut.txt','w') as f:
+        with open(os.path.join(path,name+'.txt'),'w') as f:
             for i in range(len(rlist)):
                 f.write("{0} ".format(rlist[i]))
                 for j in value:
@@ -229,13 +233,12 @@ if __name__ == '__main__':
         list1=[rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W]
         
         #--------------------------save data as xls-------------------------------
-        with open('data_Re_liner_cut.xls','w',encoding='gbk') as output:
-
+        with open(os.path.join(path,name+'.xls'),'w',encoding='gbk') as output:
             for i in range(len(list1)):
                 for j in range(len(list1[i])):
                     output.write(str(list1[i][j]))    
                     output.write('\t')   
-                output.write('\n')       
+                output.write('\n')
         output.close()
 
     #-----------------------------draw---------------------------------------
