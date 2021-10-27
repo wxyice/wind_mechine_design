@@ -21,6 +21,7 @@ def update_point2D(frame, point, x, y):
     point.set_data(x[:frame], y[:frame])
     return point
 
+
 def draw3D(X=[], Y=[], Z=[], x=[], y=[], z=[]):
     # Attaching 3D axis to the figure
     fig = plt.figure()
@@ -33,13 +34,13 @@ def draw3D(X=[], Y=[], Z=[], x=[], y=[], z=[]):
 
     # Setting the axes properties
     # ax.set_xlim3d([0.0, 1.0])
-    # ax.set_xlabel('a')
+    ax.set_xlabel('a')
 
     # ax.set_ylim3d([0.0, 1.0])
-    # ax.set_ylabel('a\'')
+    ax.set_ylabel('a\'')
 
     # ax.set_zlim3d([0.0, 1.0])
-    # ax.set_zlabel('Z')pangzhentao biexuele kuaihuilaiba
+    ax.set_zlabel('Cp')# pangzhentao biexuele kuaihuilaiba
 
     ax.set_title('3D Test')
     line = ax.plot([], [], 'r-', animated=False, linewidth=3.0)[0]
@@ -50,7 +51,7 @@ def draw3D(X=[], Y=[], Z=[], x=[], y=[], z=[]):
 
     plt.show()
 
-    return print('-------------------------------------------Drawing 3D finished!!!------------------------------------------')
+    print('-------------------------------------------Drawing 3D finished!!!------------------------------------------')
 
 def draw2D(X=[], Y=[], x=[], y=[]):
 
@@ -60,10 +61,10 @@ def draw2D(X=[], Y=[], x=[], y=[]):
     
     # Setting the axes properties
     # ax.set_xlim3d([0.0, 1.0])
-    # ax.set_xlabel('a')
+    ax.set_xlabel('a')
 
     # ax.set_ylim3d([0.0, 1.0])
-    # ax.set_ylabel('a\'')
+    ax.set_ylabel('a\'')
 
     point = ax.plot([], [], 'r-', animated=False, linewidth=3.0)[0]
 
@@ -73,7 +74,7 @@ def draw2D(X=[], Y=[], x=[], y=[]):
 
     plt.show()
 
-    return print('-------------------------------------------Drawing 2D finished!!!-------------------------------------------')
+    print('-------------------------------------------Drawing 2D finished!!!-------------------------------------------')
 
 
 

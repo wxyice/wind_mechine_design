@@ -2,9 +2,8 @@ import random
 from math import acos, atan, cos, e, pi, sin, sqrt
 
 import numpy as np
-from matplotlib import pyplot as plt
 
-from plot2D3D import draw3D
+
 
 
 def cal_F(r,R,n,r_hub,phi):
@@ -103,7 +102,6 @@ def cal_CPmax(r,R,n,r_hub,v1):
             #print("a={},iter={}".format(a_new,iternum))
     return a_new,cal_a1(a_new,r,R,n,r_hub,v1),cal_Cp(a_new,r,R,n,r_hub,v1)
 
-
 def Re2Cl(Re):
     '''
     R² = 0.9996
@@ -155,7 +153,6 @@ def main_cal(R,r_hub,v1,n):
     omega=n*2*pi
     step=100
     delta=0.1
-
 
     #------------------------calculate---------------------------
     rlist=iter(np.linspace(r_hub+delta,R-delta,step))
@@ -228,47 +225,29 @@ def cal_a1_for_draw(a,r,R,n,r_hub,v1):
     return a1_all,f_all,a1_iter_list,f_iter_list
 
 def cal_CPmax_for_draw(r,R,n,r_hub,v1):
-    # lamda=(n*2*pi)*r/v1
-
-    # def Cp_cal_all(a,a1,n,r,lamda,R,r_hub):
-    #     phi=cal_phi(a,a1,lamda)
-    #     F=cal_F(r,R,n,r_hub,phi)
-    #     print(a,a1,phi,F,lamda,4*(1-a)*a1*F*lamda**2)
-    #     return 4*(1-a)*a1*F*lamda**2
     lamda=(n*2*pi)*r/v1
-    def cal_F_np(r,R,n,r_hub,phi):
+
+    def cal_Cp_all(a,a1,r,R,n,r_hub,lamda):
+        phi=np.arctan((1-a)/(lamda*(1+a1)))
+
         Fte=np.exp((-n*(R-r)/(2*R*np.sin(phi))))
         Ft=2*np.arccos(Fte)/np.pi
         Fhe=np.exp((-n*(r-r_hub)/(2*r_hub*np.sin(phi))))
         Fh=2*np.arccos(Fhe)/np.pi
         F=Ft*Fh
-        return F
-    def cal_phi_np(a,a1,lamda):
-        phi=np.arctan((1-a)/(lamda*(1+a1)))
-        return phi
-
-    def cal_Cp_all(a,a1,r,R,n,r_hub,lamda):
-        
-        phi=cal_phi_np(a,a1,lamda)
-        F=cal_F_np(r,R,n,r_hub,phi)
-        Cp=4*(1-a)*a1*F*lamda**2
-        return Cp
+        return 4*(1-a)*a1*F*lamda**2
     
-    #print(cal_Cp_all(0.37075,0.077900,r,R,n,r_hub,v1))
-        
-    a_all=np.linspace(0.05,0.5,20)#[i/100 for i in range(0,50)]
-    a1_all=np.linspace(0.001,0.2,20)#[i/100 for i in range(0,10)]
+    a_all=np.linspace(0.05,0.5,200)
+    a1_all=np.linspace(0.001,0.2,200)
     a_all,a1_all=np.meshgrid(a_all,a1_all)
     Cp_all=cal_Cp_all(a_all, a1_all, r, R, n, r_hub, lamda)
 
     err=100
     da=1e-5
-    a=0.1#random.random()
+    a=0.1
     learning_rate=0.01
     iternum=0
-    a_iter_list=[]
-    a1_iter_list=[]
-    Cp_iter_list=[]
+    a_iter_list,a1_iter_list,Cp_iter_list=[],[],[]
     while True:
         a_iter_list.append(a)
         a1=cal_a1(a,r,R,n,r_hub,v1)
@@ -293,8 +272,8 @@ def cal_CPmax_for_draw(r,R,n,r_hub,v1):
     return a_all,a1_all,Cp_all,a_iter_list,a1_iter_list,Cp_iter_list
 
 if __name__ == '__main__':
-    from plot2D3D import draw2D
-    
+    from plot2D3D import draw2D,draw3D
+
     # 基本参数数据
     R=12.7      # m
     r_hub=0.3   # m
@@ -303,6 +282,7 @@ if __name__ == '__main__':
 
     r=3
     a=0.35
+
     a1_all,f_all,a1_iter_list,f_iter_list=cal_a1_for_draw(a,r,R,n,r_hub,v1)
     draw2D(X=a1_all,Y=f_all,x=a1_iter_list,y=f_iter_list)
 
