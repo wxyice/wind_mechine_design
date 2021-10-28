@@ -271,6 +271,53 @@ def cal_CPmax_for_draw(r,R,n,r_hub,v1):
     Cp_iter_list=np.array(Cp_iter_list)
     return a_all,a1_all,Cp_all,a_iter_list,a1_iter_list,Cp_iter_list
 
+
+def cal_l_Re_for_draw(a,a1,r,R,n,r_hub,v1):
+
+    def cal_f(l,W,F,phi,n,r,v):
+        Re=W*l/v
+        Cl=Re2Cl(Re)   
+        return cal_l(a,F,phi,n,r,Cl)-l
+
+    lamda=(n*2*pi)*r/v1
+    W=v1*sqrt((1-a)**2+(1-a1)**2*lamda**2)
+    v=1.511e-5
+
+    phi=cal_phi(a, a1, lamda)
+    F=cal_F(r, R, n, r_hub, phi)
+
+    l_all=np.linspace(0.1,6,100)
+    f_all=[]
+    for l in l_all:
+        f_all.append(cal_f(l,W,F,phi,n,r,v))
+
+    err=10000
+    l=5
+    dx=1e-6
+
+    l_iter_list=[]
+    f_iter_list=[]
+
+    while err>1e-6:
+        l_iter_list.append(l)
+        f_iter_list.append(cal_f(l,W,F,phi,n,r,v))
+
+        kkk=cal_f(l+dx,W,F,phi,n,r,v)
+        kkk=cal_f(l,W,F,phi,n,r,v)
+
+
+        dy=(cal_f(l+dx,W,F,phi,n,r,v)-cal_f(l,W,F,phi,n,r,v))/dx
+        l=l-cal_f(l,W,F,phi,n,r,v)/(dy+1e-8)
+
+        kkk=cal_f(l,W,F,phi,n,r,v)
+        print(kkk)
+        err=abs(kkk)
+    l_iter_list.append(l)
+    f_iter_list.append(cal_f(l,W,F,phi,n,r,v))
+    return l_all,np.array(f_all),np.array(l_iter_list),np.array(f_iter_list)
+
+
+
 if __name__ == '__main__':
     from plot2D3D import draw2D,draw3D
 
@@ -283,8 +330,14 @@ if __name__ == '__main__':
     r=3
     a=0.35
 
-    a1_all,f_all,a1_iter_list,f_iter_list=cal_a1_for_draw(a,r,R,n,r_hub,v1)
-    draw2D(X=a1_all,Y=f_all,x=a1_iter_list,y=f_iter_list)
+    #a1_all,f_all,a1_iter_list,f_iter_list=cal_a1_for_draw(a,r,R,n,r_hub,v1)
+    #draw2D(X=a1_all,Y=f_all,x=a1_iter_list,y=f_iter_list)
 
     a_all,a1_all,Cp_all,a_iter_list,a1_iter_list,Cp_iter_list=cal_CPmax_for_draw(r,R,n,r_hub,v1)
-    draw3D(X=a_all,Y=a1_all,Z=Cp_all,x=a_iter_list,y=a1_iter_list,z=Cp_iter_list)
+    draw3D(X=a_all,Y=a1_all,Z=Cp_all,x=a_iter_list[0:50],y=a1_iter_list[0:50],z=Cp_iter_list[0:50])
+    #a1=a1_iter_list[-1]
+    
+    #l_all,f_all,l_iter_list,f_iter_list=cal_l_Re_for_draw(a,a1,r,R,n,r_hub,v1)
+    #print(l_all)
+    #draw2D(X=l_all,Y=f_all,x=l_iter_list,y=f_iter_list)
+    
