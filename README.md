@@ -56,15 +56,25 @@ $$dC_p=\frac{dP}{\frac{1}{2}\rho v_0^3ds}=\frac{4\pi\rho v_1\mathrm{\Omega}^2\le
 
 首先明确需要计算的参数之间的相互关系
 $$F=f(r,R,n,r_hub,\mathrm{\Phi})$$
+
 $$\mathrm{\Phi}=f(a,a\prime,\lambda)$$
+
 $$\lambda=f(r,v_1,n) $$
+
 $$a\prime=f(a,r,R,n,r_hub,v_1) $$
+
 $$C_p=f(F,a,a\prime,\lambda) $$
+
 $$l=f(r,n,a,\mathrm{\Phi},F,C_l)$$
+
 $$R_e=f(l,v,W) $$
+
 $$W=f(a,a\prime,\lambda,v_1) $$
+
 $$C_l=f(R_e)$$
+
 $$f\left(a,a^\prime,F,\lambda\right)=0$$
+
 我们发现1至4四个函数表达式，恒等式10和最大化目标5构成了关于$\lambda,F,a,a^\prime,\mathrm{\Phi},C_p$的闭合求解条件，但考虑到它们之间隐式的函数关系以及需要通过最大化来确定某一个参数，我们决定采取牛顿迭代法和基于梯度的最大化方法结合的方式求取最优条件下的$\lambda,F,a,a^\prime,\mathrm{\Phi},C_p$。
 另一方面，6至9四个函数表达式也构建了关于$l,R_e,W,C_l$的闭合求解条件，但考虑到9本身函数形式的不确定性，需要进一步补充数据或者表达式，我们同样决定采用牛顿迭代法计算得到$l,R_e,W,C_l$。
 
