@@ -19,10 +19,10 @@ if __name__ == '__main__':
     if os.path.exists(path)==False:
         os.mkdir(path)
 
-    value=main_cal(R,r_hub,v1,n)
+    value=main_cal(R,r_hub,v1,n,step=30)
 
-    rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W=value
-    value=[alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W]
+    rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W,alpha=value
+    value=[alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W,alpha]
 
     save=False
     if save:
@@ -35,7 +35,7 @@ if __name__ == '__main__':
                     f.write("{0} ".format(j[i]))
                 f.write('\n')
 
-        list1=[rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W]
+        list1=[rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W,alpha]
         
         #--------------------------save data as xls-------------------------------
         with open(os.path.join(path,name+'.xls'),'w',encoding='gbk') as output:
@@ -46,8 +46,42 @@ if __name__ == '__main__':
                 output.write('\n')
         output.close()
 
+    # -----------------------------------------------------------------------
+    result={}
+    result['a']=alist
+    result['a1']=a1list
+    result['F']=Flist
+    result['phi']=philist
+    result['Cp']=Cplist
+    result['l']=llist
+    result['sigma']=sigmalist
+    result['av1']=av1list
+    result['omega']=omegarlist
+    result['W']=W
+    result['alpha']=alpha
+    def figure_show(r,arg,argname):
+        
+        #plt.figure(figsize=(15, 4))
+        plt.plot(r,arg,'b.',markersize=10)
+        plt.plot(r,arg,'g-',linewidth=1)
+        
+        plt.xlabel('r/m')
+        plt.ylabel(argname)
+        plt.ylim(0,)
+        #plt.title('r-{0}'.format())
+        plt.savefig("fig\\{0}.png".format(argname))
+    
+    # figure_show(rlist,result['F'],'F')
+    # figure_show(rlist,result['phi'],'phi')
+    # figure_show(rlist,result['l'],'l')
+    # figure_show(rlist,result['sigma'],'sigma')
+    # figure_show(rlist,result['av1'],'av1')
+    # figure_show(rlist,result['omega'],'omega')
+    # figure_show(rlist,result['W'],'W')
+
+
     #-----------------------------draw---------------------------------------
-    draw=True
+    draw=False
     if draw:
         for i in range(len(value)):
             plt.subplot(5,2,i+1)
@@ -55,7 +89,7 @@ if __name__ == '__main__':
         plt.show()
 
     #-----------------------------draw3D---------------------------------------
-    draw3D=True
+    draw3D=False
     if draw3D:
         r=3
         a=0.35

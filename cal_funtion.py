@@ -3,7 +3,7 @@ from math import acos, atan, cos, e, pi, sin, sqrt
 
 import numpy as np
 
-
+from Refuntion import Re2Cl,Re2alpha
 
 
 def cal_F(r,R,n,r_hub,phi):
@@ -102,23 +102,6 @@ def cal_CPmax(r,R,n,r_hub,v1):
             #print("a={},iter={}".format(a_new,iternum))
     return a_new,cal_a1(a_new,r,R,n,r_hub,v1),cal_Cp(a_new,r,R,n,r_hub,v1)
 
-def Re2Cl(Re):
-    '''
-    R² = 0.9996
-    '''
-    if Re>10e5:
-       Cl=1.0423
-    if 2e5<Re<10e5:
-        Cl=-(1e-7)*Re + 1.175
-    elif 1e5<Re<2e5:
-        print(Re)
-        Cl=-(4e-7)*Re + 1.236
-    elif Re<1e5:
-        print(Re)
-        Cl=(1e-5)*Re + 0.0231
-    return Cl
-
-
 def cal_l_Re(a,a1,r,R,n,r_hub,v1):
 
     def cal_W(a,a1,lamda,v1):
@@ -145,19 +128,19 @@ def cal_l_Re(a,a1,r,R,n,r_hub,v1):
         dy=(cal_f(l+dx,W,F,phi,n,r)-cal_f(l,W,F,phi,n,r))/dx
         l=l-cal_f(l,W,F,phi,n,r)/(dy+1e-8)
         err=abs(cal_f(l,W,F,phi,n,r))
-    return l
+    Re=cal_Re(W,l,v=1.511e-5)
+    alpha=Re2alpha(Re)
+    return l,alpha,Re
     
-
-def main_cal(R,r_hub,v1,n):
+def main_cal(R,r_hub,v1,n,step=100):
     #Cl=1.0423
     omega=n*2*pi
-    step=100
     delta=0.1
 
     #------------------------calculate---------------------------
     rlist=iter(np.linspace(r_hub+delta,R-delta,step))
     alist,a1list,Cplist=[],[],[]
-    philist,Flist,llist,sigmalist,lamdalist=[],[],[],[],[]
+    philist,Flist,llist,sigmalist,lamdalist,alphalist,betalist=[],[],[],[],[],[],[]
 
     while True:
         try:
@@ -168,8 +151,9 @@ def main_cal(R,r_hub,v1,n):
         lamda=(n*2*pi)*r/v1
         phi=cal_phi(a,a1,lamda)
         F=cal_F(r,R,n,r_hub,phi)
-        l=cal_l_Re(a,a1,r,R,n,r_hub,v1)
+        l,alpha,Re=cal_l_Re(a,a1,r,R,n,r_hub,v1)
         sigma=cal_sigma(a,F,phi)
+        beta=phi/pi*180-alpha
         
         alist.append(a)
         a1list.append(a1)
@@ -179,8 +163,10 @@ def main_cal(R,r_hub,v1,n):
         Flist.append(F)
         llist.append(l)
         sigmalist.append(sigma)
+        alphalist.append(alpha*pi/180)
+        betalist.append(beta)
 
-        print("r={0:6.2f} a={1:6.4f} a1={2:6.4f} cp={3:6.4f} lamda={4:6.4f} phi={5:6.4f} F={6:6.4f} l={7:6.4f} sigma={8:6.4f}".format(r,a,a1,cp,lamda,phi,F,l,sigma))
+        print("r={0:6.2f} a={1:6.4f} a1={2:6.4f} cp={3:6.4f} lamda={4:6.4f} phi={5:6.4f} F={6:6.4f} l={7:6.4f} sigma={8:6.4f} alpha={9:6.4f} Re={10:10d} beta={11:6.4f}".format(r,a,a1,cp,lamda,phi/pi*180,F,l,sigma,alpha,int(Re),beta))
 
     rlist=np.linspace(r_hub+delta,R-delta,step).tolist()
     av1list=np.array(alist)*v1
@@ -191,10 +177,9 @@ def main_cal(R,r_hub,v1,n):
     omegarlist=omegarlist.tolist()
 
     #rlist=np.linspace(r_hub+delta,R-delta,step)
-    value=[rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W]
+    value=[rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W,alphalist]
 
     return value
-
 
 def cal_a1_for_draw(a,r,R,n,r_hub,v1):
     def cal_f(n,r,v1,R,r_hub,a,a1):
@@ -271,7 +256,6 @@ def cal_CPmax_for_draw(r,R,n,r_hub,v1):
     Cp_iter_list=np.array(Cp_iter_list)
     return a_all,a1_all,Cp_all,a_iter_list,a1_iter_list,Cp_iter_list
 
-
 def cal_l_Re_for_draw(a,a1,r,R,n,r_hub,v1):
 
     def cal_f(l,W,F,phi,n,r,v):
@@ -315,8 +299,6 @@ def cal_l_Re_for_draw(a,a1,r,R,n,r_hub,v1):
     l_iter_list.append(l)
     f_iter_list.append(cal_f(l,W,F,phi,n,r,v))
     return l_all,np.array(f_all),np.array(l_iter_list),np.array(f_iter_list)
-
-
 
 if __name__ == '__main__':
     from plot2D3D import draw2D,draw3D
