@@ -1,9 +1,9 @@
 import os
-from cal_funtion import main_cal,cal_a1_for_draw,cal_CPmax_for_draw
-import matplotlib.pyplot as plt
-import numpy as np
-from plot2D3D import draw3D,draw2D
 
+import matplotlib.pyplot as plt
+
+from cal_funtion import cal_a1_for_draw, cal_CPmax_for_draw, main_cal
+from plot2D3D import draw2D, draw3D
 
 if __name__ == '__main__':
     # 基本参数数据

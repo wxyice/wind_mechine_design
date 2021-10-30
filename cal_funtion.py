@@ -3,7 +3,7 @@ from math import acos, atan, cos, e, pi, sin, sqrt
 
 import numpy as np
 
-from Refuntion import Re2Cl,Re2alpha
+from Refuntion import Re2alpha, Re2Cl
 
 
 def cal_F(r,R,n,r_hub,phi):
@@ -301,7 +301,7 @@ def cal_l_Re_for_draw(a,a1,r,R,n,r_hub,v1):
     return l_all,np.array(f_all),np.array(l_iter_list),np.array(f_iter_list)
 
 if __name__ == '__main__':
-    from plot2D3D import draw2D,draw3D
+    from plot2D3D import draw2D, draw3D
 
     # 基本参数数据
     R=12.7      # m

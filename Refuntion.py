@@ -1,5 +1,4 @@
 
-
 # def Re2Cl(Re):
 #     '''
 #     R² = 0.9996
@@ -22,14 +21,12 @@ def Re2Cl(Re):
     if Re<=Re_point[0]:
         alpha=alpha_point[0]
     elif Re>=Re_point[-1]:
-        #alpha=(Re-Re_point[-1])/(Re_point[-1]-Re_point[-2])*(alpha_point[-1]-alpha_point[-2])+alpha_point[-2]
         alpha=alpha_point[-1]
     else:
         for i in range(1,len(Re_point)):
             if Re_point[i]>Re:
                 alpha=(Re-Re_point[i-1])/(Re_point[i]-Re_point[i-1])*(alpha_point[i]-alpha_point[i-1])+alpha_point[i-1]
                 break
-    
     return alpha
 
 

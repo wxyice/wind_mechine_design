@@ -1,7 +1,11 @@
-import os,shutil
-from math import sqrt,atan,cos,sin,pi
+import os
+import shutil
+from math import atan, cos, sin, sqrt
+
 import numpy as np
+
 from cal_funtion import main_cal
+
 
 def cal_model_xyr(path,X,Y,l,beta,r):
     x,y=[],[]
