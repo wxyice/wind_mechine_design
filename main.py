@@ -1,6 +1,7 @@
 import os
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from cal_funtion import cal_a1_for_draw, cal_CPmax_for_draw, main_cal
 from plot2D3D import draw2D, draw3D
@@ -21,8 +22,8 @@ if __name__ == '__main__':
 
     value=main_cal(R,r_hub,v1,n,step=30)
 
-    rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W,alpha=value
-    value=[alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W,alpha]
+    rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W,alphalist,betalist=value
+    value=[alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W,alphalist,betalist]
 
     save=False
     if save:
@@ -35,7 +36,7 @@ if __name__ == '__main__':
                     f.write("{0} ".format(j[i]))
                 f.write('\n')
 
-        list1=[rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W,alpha]
+        list1=[rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W,alphalist,betalist]
         
         #--------------------------save data as xls-------------------------------
         with open(os.path.join(path,name+'.xls'),'w',encoding='gbk') as output:
@@ -58,7 +59,9 @@ if __name__ == '__main__':
     result['av1']=av1list
     result['omega']=omegarlist
     result['W']=W
-    result['alpha']=alpha
+    result['alpha']=(np.array(alphalist)/np.pi)*180
+    result['beta']=betalist
+
     def figure_show(r,arg,argname):
         
         #plt.figure(figsize=(15, 4))
@@ -67,7 +70,7 @@ if __name__ == '__main__':
         
         plt.xlabel('r/m')
         plt.ylabel(argname)
-        plt.ylim(0,)
+        # plt.ylim(,)
         #plt.title('r-{0}'.format())
         plt.savefig("fig\\{0}.png".format(argname))
     
@@ -78,7 +81,8 @@ if __name__ == '__main__':
     # figure_show(rlist,result['av1'],'av1')
     # figure_show(rlist,result['omega'],'omega')
     # figure_show(rlist,result['W'],'W')
-
+    # figure_show(rlist,result['beta'],'beta')
+    figure_show(rlist,result['alpha'],'alpha')
 
     #-----------------------------draw---------------------------------------
     draw=False

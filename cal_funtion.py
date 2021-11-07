@@ -177,7 +177,7 @@ def main_cal(R,r_hub,v1,n,step=100):
     omegarlist=omegarlist.tolist()
 
     #rlist=np.linspace(r_hub+delta,R-delta,step)
-    value=[rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W,alphalist]
+    value=[rlist,alist,a1list,Flist,philist,Cplist,llist,sigmalist,av1list,omegarlist,W,alphalist,betalist]
 
     return value
 
